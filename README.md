@@ -1,6 +1,10 @@
-# 🛡️ Projet: Cerberus (Secure IoT/Telemetry Gateway)
+# 🛡️ Cerberus: Secure IoT/Telemetry Gateway
 
-> An Enterprise-grade, Zero-Idle Asynchronous Gateway for Secure IoT Telemetry Data Ingestion.
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black) ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white) ![DevSecOps](https://img.shields.io/badge/DevSecOps-000000?style=for-the-badge&logo=security&logoColor=white) ![Systemd](https://img.shields.io/badge/Systemd-4FA1FA?style=for-the-badge) ![Python](https://img.shields.io/badge/Python_Async-3776AB?style=for-the-badge&logo=python&logoColor=white)
+
+> An enterprise-grade, immutable, encrypted, and zero-idle telemetry gateway engineered with advanced Python and native Linux tools.
+
+---
 
 ## 📖 Introduction
 **Cerberus** is a high-performance, asynchronous Python-based gateway designed to securely receive, validate, and store thousands of concurrent requests from IoT sensors and APIs[cite: 7]. Built with a strict focus on Software Engineering best practices and Linux system administration, it bridges the gap between raw infrastructure and data systems[cite: 4, 7].
