@@ -1,0 +1,9 @@
+[Unit]
+Description=Cerberus IoT Gateway Socket
+
+[Socket]
+ListenStream=8443
+Accept=yes
+
+[Install]
+WantedBy=sockets.target
