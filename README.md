@@ -40,6 +40,8 @@ cerberus-gateway/
 ├── tests/
 └── pyproject.toml              # Dependencies & Config
 
+```
+
 ## 🗺️ System Architecture
 
 ```text
