@@ -1,4 +1,4 @@
-# 🛡️ Cerberus: Secure IoT/Telemetry Gateway
+# 🛡️ Cerberus: Secure IoT/Telemetry Gateway 
 
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black) ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white) ![DevSecOps](https://img.shields.io/badge/DevSecOps-000000?style=for-the-badge&logo=security&logoColor=white) ![Systemd](https://img.shields.io/badge/Systemd-4FA1FA?style=for-the-badge) ![Python](https://img.shields.io/badge/Python_Async-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
