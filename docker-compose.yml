@@ -1,0 +1,22 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: cerberus-timescaledb
+    restart: always
+    environment:
+      POSTGRES_USER: cerberus_user
+      POSTGRES_PASSWORD: cerberus_password
+      POSTGRES_DB: cerberus_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+      - ./config/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cerberus_user -d cerberus_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  timescale_data:
