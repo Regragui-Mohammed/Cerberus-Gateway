@@ -42,7 +42,6 @@
 - [Installation & Setup](#-installation--setup)
 - [Running the Gateway](#-running-the-gateway)
 - [Testing](#-testing)
-- [Roadmap: MLOps & Industry 4.0](#-roadmap-mlops--industry-40)
 - [Project Structure](#-project-structure)
 
 ---
@@ -422,29 +421,6 @@ tests/test_gateway.py::test_firewall_ignores_protected_ips            PASSED [10
 
 ============================== 6 passed in 0.70s ===============================
 ```
-
----
-
-## 🚀 Roadmap: MLOps & Industry 4.0 Extensibility
-
-Cerberus is built to serve as the hardened **Ingestion & Validation Gateway** for production AI pipelines:
-
-```
-[ Edge Sensors ] ──(mTLS)──► [ Cerberus Gateway ] ──► [ TimescaleDB ]
-                                    │                         │
-                             (Strict Validation)              ▼
-                                    │              [ ONNX Runtime Inference ]
-                                    ▼              (Lightweight Anomaly Detector)
-                             [ DLQ & Firewall ]               │
-                                                              ▼
-                                                   [ Evidently AI & MLflow ]
-                                                   (Data Drift & Model Registry)
-```
-
-- [x] **Phase 1: Ingestion & Active Defense:** Systemd Socket Activation, Asyncio Concurrency, mTLS, nftables Auto-Ban, TimescaleDB Hypertables.
-- [ ] **Phase 2: Real-Time ML Scoring:** Lightweight ONNX Runtime inference engine scoring sensor degradation directly off the async ingestion queue.
-- [ ] **Phase 3: Sensor Drift Detection:** Integration with Evidently AI to monitor feature distribution drift in industrial telemetry.
-- [ ] **Phase 4: Unified Model Governance:** MLflow tracking for model versioning and automated retraining triggers on sensor drift alerts.
 
 ---
 
