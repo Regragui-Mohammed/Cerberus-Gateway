@@ -19,6 +19,13 @@
   <img src="https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square" alt="license"/>
 </p>
 
+<p align="center">
+  <img src="assets/dashboard_demo.jpg" alt="Cerberus Live Telemetry & Security Observability Dashboard" width="95%"/>
+</p>
+<p align="center">
+  <em>Real-Time IoT Telemetry Stream (TimescaleDB + Grafana) alongside Active Linux Kernel Defense (nftables)</em>
+</p>
+
 </div>
 
 ---
@@ -28,13 +35,14 @@
 - [Problem Statement](#-problem-statement)
 - [Architecture Overview](#-architecture-overview)
 - [Core Features](#-core-features)
+- [Live Observability & Security Demo](#-live-observability--security-demo)
 - [Module Breakdown](#-module-breakdown)
 - [Security Model](#-security-model)
 - [Data Pipeline](#-data-pipeline)
 - [Installation & Setup](#-installation--setup)
 - [Running the Gateway](#-running-the-gateway)
 - [Testing](#-testing)
-- [Screenshots / Demo](#-screenshots--demo)
+- [Roadmap: MLOps & Industry 4.0](#-roadmap-mlops--industry-40)
 - [Project Structure](#-project-structure)
 
 ---
@@ -218,7 +226,7 @@ Sensor  ──(mTLS TCP)──►  handle_client()
 ### 1. Clone & Create Virtual Environment
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/cerberus-gateway.git
+git clone https://github.com/Regragui-Mohammed/cerberus-gateway.git
 cd cerberus-gateway
 python3 -m venv venv
 source venv/bin/activate
@@ -340,70 +348,103 @@ tests/test_gateway.py::test_firewall_ignores_protected_ips            PASSED
 
 ---
 
-## 📸 Screenshots / Demo
+## 📸 Live Observability & Security Demo
 
-> 💡 **Tip:** Use [`asciinema`](https://asciinema.org/) to record terminal demos and embed them as GIFs with [`agg`](https://github.com/asciinema/agg).
-
----
-
-### 1. 🟢 Gateway Startup — Systemd Socket Activation
-
-> Run: `journalctl -u cerberus@.service -f`  
-> Shows the gateway waking up from zero-idle upon the first incoming connection.
+### 1. 📊 Grafana Observability Dashboard
+The gateway provides real-time observability over all telemetry streams, active tenants, sensor status anomalies, and kernel security violations:
 
 ```
-[ SCREENSHOT: terminal showing "Cerberus Gateway started via Systemd Socket Activation (FD 3)" ]
+[ Grafana Dashboard: http://localhost:3000/d/cerberus-overview ]
+• Total Ingested Events Counter (1,000+ non-blocking writes via asyncpg)
+• Real-time Temperature (°C) & Pressure (hPa) continuous time-series curves
+• Active Multi-Tenant Sensor Health Status table
+• Live Security Strike & Kernel Blackhole event table
 ```
 
 ---
 
-### 2. ✅ Valid Telemetry Ingestion — ACK & DB Persist
+### 2. ⚡ High-Throughput Concurrent Ingestion
+Legitimate IoT sensors continuously transmit cryptographically verified telemetry over Mutual TLS:
 
-> Split terminal: left = `openssl s_client` sending a valid payload → right = gateway log "Persisted telemetry | Tenant: ... | Device: SENSOR-001 | Temp: 22.50"
-
-```
-[ SCREENSHOT or GIF: valid payload → ACK → TimescaleDB insert log ]
-```
-
----
-
-### 3. 💥 Attack Simulation — DLQ + nftables Auto-Ban
-
-> 3 malformed payloads sent → gateway logs "Security strike 1/3 ... 2/3 ... KERNEL BAN APPLIED: 203.0.113.55" → `nft list ruleset` shows the blocked IP.
-
-```
-[ GIF: attack simulation → automatic kernel ban in action ]
+```text
+[0042] Sent SENSOR-005 | Temp: 27.30°C | Status: OK      -> ACK: Telemetry accepted
+[0043] Sent SENSOR-004 | Temp: 25.12°C | Status: OK      -> ACK: Telemetry accepted
+[0044] Sent SENSOR-002 | Temp: 24.87°C | Status: OK      -> ACK: Telemetry accepted
+[0045] Sent SENSOR-005 | Temp: 27.63°C | Status: OK      -> ACK: Telemetry accepted
+[0046] Sent SENSOR-004 | Temp: 27.00°C | Status: OK      -> ACK: Telemetry accepted
+[0047] Sent SENSOR-004 | Temp: 33.78°C | Status: WARNING -> ACK: Telemetry accepted
 ```
 
 ---
 
-### 4. 🚦 Rate Limiting in Action
+### 3. 💥 Active Defense in Action (Auto-Ban via nftables)
+When a threat actor attempts schema poisoning, binary fuzzing, or rate-limit abuse:
 
-> Burst of rapid requests from one tenant → "Rate limit exceeded | Tenant: ... | IP: ..." → `ERR: Rate limit exceeded` response.
-
-```
-[ SCREENSHOT: rate limit terminal log output ]
-```
-
----
-
-### 5. 📋 Dead-Letter Queue (DLQ) Inspector
-
-> `cat logs/dlq.jsonl | python3 -m json.tool` showing structured rejected payloads with `tenant_id`, `error_type`, `error_details`, and the raw invalid payload.
-
-```
-[ SCREENSHOT: pretty-printed DLQ entries ]
+```text
+2026-11-13 07:22:32,050 | WARNING | Security strike 1/3 for 127.0.0.1 | Reason: Malformed telemetry JSON from Tenant_001
+2026-11-13 07:22:33,063 | WARNING | Security strike 2/3 for 127.0.0.1 | Reason: Malformed telemetry JSON from Tenant_001
+2026-11-13 07:22:34,076 | WARNING | Security strike 3/3 for 127.0.0.1 | Reason: Malformed telemetry JSON from Tenant_001
+2026-11-13 07:22:34,080 | CRITICAL | KERNEL BAN APPLIED: 127.0.0.1 blackholed for 10m | Reason: Security policy violation
 ```
 
 ---
 
-### 6. 🧪 Test Suite — All 6 Tests Passing
+### 4. 📬 Dead-Letter Queue (DLQ) Sample Output
+Rejected payloads are never dropped silently; they are serialized into `logs/dlq.jsonl` with cryptographic tenant identity and Pydantic validation trace:
 
-> `pytest tests/ -v` full output with all tests green.
+```json
+{
+  "timestamp": "2026-11-13T07:29:46.106035+00:00",
+  "tenant_id": "Tenant_001",
+  "error_type": "ValidationError",
+  "error_details": "1 validation error for TelemetryPayload\ntemperature\n  Input should be a valid number, unable to parse string as a number [type=float_parsing, input_value='CORRUPTED_STRING']",
+  "raw_payload": "{\"device_id\": \"SENSOR-EVIL\", \"temperature\": \"CORRUPTED_STRING\", \"pressure\": 1013.25}"
+}
+```
+
+---
+
+### 5. 🧪 Test Suite Execution
+Rigorous test coverage validating schema invariants, DLQ persistence, rate-limiting refill mechanics, and subprocess kernel execution:
+
+```text
+============================= test session starts ==============================
+platform linux -- Python 3.13.11, pytest-9.2.0, pluggy-1.7.0
+plugins: asyncio-1.5.0
+collected 6 items
+
+tests/test_gateway.py::test_telemetry_payload_valid                   PASSED [ 16%]
+tests/test_gateway.py::test_telemetry_payload_rejects_corrupted_types PASSED [ 33%]
+tests/test_gateway.py::test_dlq_records_malformed_payload             PASSED [ 50%]
+tests/test_gateway.py::test_token_bucket_burst_and_refill             PASSED [ 66%]
+tests/test_gateway.py::test_firewall_bans_after_max_strikes           PASSED [ 83%]
+tests/test_gateway.py::test_firewall_ignores_protected_ips            PASSED [100%]
+
+============================== 6 passed in 0.70s ===============================
+```
+
+---
+
+## 🚀 Roadmap: MLOps & Industry 4.0 Extensibility
+
+Cerberus is built to serve as the hardened **Ingestion & Validation Gateway** for production AI pipelines:
 
 ```
-[ SCREENSHOT: pytest -v output ]
+[ Edge Sensors ] ──(mTLS)──► [ Cerberus Gateway ] ──► [ TimescaleDB ]
+                                    │                         │
+                             (Strict Validation)              ▼
+                                    │              [ ONNX Runtime Inference ]
+                                    ▼              (Lightweight Anomaly Detector)
+                             [ DLQ & Firewall ]               │
+                                                              ▼
+                                                   [ Evidently AI & MLflow ]
+                                                   (Data Drift & Model Registry)
 ```
+
+- [x] **Phase 1: Ingestion & Active Defense:** Systemd Socket Activation, Asyncio Concurrency, mTLS, nftables Auto-Ban, TimescaleDB Hypertables.
+- [ ] **Phase 2: Real-Time ML Scoring:** Lightweight ONNX Runtime inference engine scoring sensor degradation directly off the async ingestion queue.
+- [ ] **Phase 3: Sensor Drift Detection:** Integration with Evidently AI to monitor feature distribution drift in industrial telemetry.
+- [ ] **Phase 4: Unified Model Governance:** MLflow tracking for model versioning and automated retraining triggers on sensor drift alerts.
 
 ---
 
