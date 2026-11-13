@@ -1,5 +1,7 @@
+from datetime import datetime
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+
 from src.database import Database, db
 from src.models import TelemetryPayload
 
@@ -7,10 +9,16 @@ logger = logging.getLogger("cerberus.repository")
 
 
 class TelemetryRepository:
+    """
+    Repository pattern isolating database persistence operations for telemetry data.
+    Provides methods for atomic and batch insertions into TimescaleDB hypertable.
+    """
+
     def __init__(self, database: Optional[Database] = None) -> None:
         self.db: Database = database or db
 
     async def insert_telemetry(self, tenant_id: str, payload: TelemetryPayload) -> None:
+        """Inserts a single validated telemetry record."""
         query = """
         INSERT INTO telemetry (timestamp, tenant_id, device_id, temperature, pressure, status)
         VALUES ($1, $2, $3, $4, $5, $6);
@@ -27,7 +35,13 @@ class TelemetryRepository:
             )
             logger.debug("Persisted telemetry for device %s", payload.device_id)
 
-    async def insert_batch(self, records: List[tuple]) -> None:
+    async def insert_batch(
+        self, records: List[Tuple[datetime, str, str, float, float, str]]
+    ) -> None:
+        """
+        Batch inserts multiple telemetry tuples for maximum ingestion throughput.
+        Each tuple must match: (timestamp, tenant_id, device_id, temperature, pressure, status)
+        """
         query = """
         INSERT INTO telemetry (timestamp, tenant_id, device_id, temperature, pressure, status)
         VALUES ($1, $2, $3, $4, $5, $6);
@@ -36,7 +50,10 @@ class TelemetryRepository:
             await conn.executemany(query, records)
             logger.info("Successfully ingested batch of %d telemetry records", len(records))
 
-    async def get_latest_metrics(self, tenant_id: str, device_id: str, limit: int = 10) -> List[Dict[str, Any]]:
+    async def get_latest_metrics(
+        self, tenant_id: str, device_id: str, limit: int = 10
+    ) -> List[Dict[str, Any]]:
+        """Queries the most recent telemetry readings using the hypertable composite index."""
         query = """
         SELECT timestamp, tenant_id, device_id, temperature, pressure, status
         FROM telemetry

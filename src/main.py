@@ -40,7 +40,7 @@ def extract_tenant_id(writer: asyncio.StreamWriter) -> str:
     if not cert or "subject" not in cert:
         return "unknown_tenant"
     subject = dict(x[0] for x in cert["subject"])
-    return subject.get("commonName", "unknown_tenant")
+    return str(subject.get("commonName", "unknown_tenant"))
 
 
 async def db_consumer_worker(
@@ -96,7 +96,7 @@ async def handle_client(
 ) -> None:
     """Handles an incoming mTLS client connection with rate limiting and backpressure."""
     peername = writer.get_extra_info("peername")
-    client_ip = peername[0] if peername else "0.0.0.0"
+    client_ip: str = str(peername[0]) if peername else "0.0.0.0"
     tenant_id = extract_tenant_id(writer)
 
     try:
@@ -147,12 +147,12 @@ async def main() -> None:
         max_strikes=3,
         strike_window=60.0,
         ban_duration="60s",
-        protected_ips=set(),  # Keep empty during local attack simulation
+        protected_ips=set(),
     )
 
     db = Database()
     await db.connect()
-    repo = TelemetryRepository(db.pool)
+    repo = TelemetryRepository(db)
 
     # 2. Launch background DB & Validation consumer worker
     worker_task = asyncio.create_task(
