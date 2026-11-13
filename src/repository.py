@@ -64,3 +64,22 @@ class TelemetryRepository:
         async with self.db.acquire() as conn:
             rows = await conn.fetch(query, tenant_id, device_id, limit)
             return [dict(row) for row in rows]
+
+    async def insert_security_event(
+        self,
+        tenant_id: str,
+        client_ip: str,
+        event_type: str,
+        reason: str,
+        raw_payload: str = "",
+    ) -> None:
+        """Records an attack, rate-limit, or schema violation for live security observability."""
+        query = """
+        INSERT INTO security_events (timestamp, tenant_id, client_ip, event_type, reason, raw_payload)
+        VALUES (NOW(), $1, $2, $3, $4, $5);
+        """
+        try:
+            async with self.db.acquire() as conn:
+                await conn.execute(query, tenant_id, client_ip, event_type, reason, raw_payload)
+        except Exception as e:
+            logger.error("Failed to record security event in database: %s", e)

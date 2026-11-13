@@ -1,0 +1,19 @@
+apiVersion: 1
+
+datasources:
+  - name: TimescaleDB
+    type: postgres
+    uid: cerberus-timescaledb
+    access: proxy
+    url: timescaledb:5432
+    user: cerberus_user
+    secureJsonData:
+      password: cerberus_password
+    jsonData:
+      database: cerberus_db
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: true
+    isDefault: true
+    editable: true
+

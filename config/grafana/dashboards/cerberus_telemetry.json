@@ -1,0 +1,357 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "⚡ Cerberus Telemetry Gateway — Overview",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 10 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+          "format": "table",
+          "rawSql": "SELECT count(*) AS \"Total Events\" FROM telemetry;",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Ingested Events",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "purple", "value": null }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+          "format": "table",
+          "rawSql": "SELECT count(DISTINCT device_id) AS \"Active Sensors\" FROM telemetry WHERE timestamp >= NOW() - INTERVAL '15 minutes';",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Sensors (Last 15m)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+          "format": "table",
+          "rawSql": "SELECT count(*) AS \"Blocked Attacks\" FROM security_events;",
+          "refId": "A"
+        }
+      ],
+      "title": "🚨 Blocked Attacks & DLQ (nftables)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "dark-blue", "value": null }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+          "format": "table",
+          "rawSql": "SELECT count(DISTINCT tenant_id) AS \"Tenants\" FROM telemetry;",
+          "refId": "A"
+        }
+      ],
+      "title": "Verified Tenants (mTLS)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 50 },
+              { "color": "red", "value": 85 }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+      "id": 5,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+          "format": "time_series",
+          "rawSql": "SELECT timestamp AS \"time\", device_id AS metric, temperature FROM telemetry WHERE ( $__timeFilter(timestamp) OR timestamp >= NOW() - INTERVAL '15 minutes' ) ORDER BY 1;",
+          "refId": "A"
+        }
+      ],
+      "title": "🌡️ Live Sensor Temperature (°C)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null }
+            ]
+          },
+          "unit": "pressurehpa"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+      "id": 6,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+          "format": "time_series",
+          "rawSql": "SELECT timestamp AS \"time\", device_id AS metric, pressure FROM telemetry WHERE ( $__timeFilter(timestamp) OR timestamp >= NOW() - INTERVAL '15 minutes' ) ORDER BY 1;",
+          "refId": "A"
+        }
+      ],
+      "title": "💨 Atmospheric Pressure (hPa)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "align": "auto", "displayMode": "auto" },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "status" },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  { "type": "value", "options": { "OK": { "color": "green", "index": 0 } } },
+                  { "type": "value", "options": { "WARNING": { "color": "orange", "index": 1 } } },
+                  { "type": "value", "options": { "CRITICAL": { "color": "red", "index": 2 } } }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 13 },
+      "id": 7,
+      "options": {
+        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+        "showHeader": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+          "format": "table",
+          "rawSql": "SELECT timestamp, tenant_id, device_id, temperature, pressure, status FROM telemetry ORDER BY timestamp DESC LIMIT 50;",
+          "refId": "A"
+        }
+      ],
+      "title": "📋 Real-Time Ingested Telemetry Stream",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": { "align": "auto", "displayMode": "auto" },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "event_type" },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "color",
+                "value": { "fixedColor": "red", "mode": "fixed" }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 21 },
+      "id": 8,
+      "options": {
+        "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+        "showHeader": true
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cerberus-timescaledb" },
+          "format": "table",
+          "rawSql": "SELECT timestamp, client_ip, event_type, reason, raw_payload FROM security_events ORDER BY timestamp DESC LIMIT 20;",
+          "refId": "A"
+        }
+      ],
+      "title": "🛡️ Active Defense & Blocked Attack Logs (nftables & DLQ)",
+      "type": "table"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["cerberus", "iot", "timescaledb", "telemetry"],
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["1s", "5s", "10s", "30s"]
+  },
+  "timezone": "browser",
+  "title": "Cerberus IoT Telemetry Gateway",
+  "uid": "cerberus-overview",
+  "version": 1
+}
+

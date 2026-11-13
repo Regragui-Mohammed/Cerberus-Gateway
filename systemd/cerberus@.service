@@ -3,12 +3,12 @@ Description=Cerberus IoT Gateway Instance %i
 Requires=cerberus.socket
 
 [Service]
-StandarInput=socket
-StandarOutput=journal
-StandarError=journal
-ExcStart=/home/regragui/cerberus-gateway/venv/bin/python /home/regragui/cerberus-gateway/src/main.py
+StandardInput=socket
+StandardOutput=journal
+StandardError=journal
+ExecStart=/home/regragui/cerberus-gateway/venv/bin/python /home/regragui/cerberus-gateway/src/main.py
 
 DynamicUser=yes
 ProtectSystem=strict
-NoNewPrevilages=yes
+NoNewPrivileges=yes
 MemoryMax=256M

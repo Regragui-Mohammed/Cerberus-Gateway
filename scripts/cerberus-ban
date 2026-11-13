@@ -1,0 +1,21 @@
+#!/bin/bash
+set -euo pipefail
+
+IP="${1:-}"
+TIMEOUT="${2:-10m}"
+
+# 1. Strict IPv4 validation to prevent command/nft syntax injection
+if [[ ! "$IP" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+    echo "Error: Invalid IPv4 address format" >&2
+    exit 1
+fi
+
+# 2. Strict timeout format validation (e.g., 30s, 10m, 1h)
+if [[ ! "$TIMEOUT" =~ ^[0-9]+(s|m|h)$ ]]; then
+    echo "Error: Invalid timeout format" >&2
+    exit 1
+fi
+
+# 3. Add IP to the nftables blackhole set (idempotent: refreshes timeout if already banned)
+/usr/sbin/nft add element inet cerberus blackhole "{ $IP timeout $TIMEOUT }"
+

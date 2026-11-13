@@ -4,7 +4,7 @@ import os
 import signal
 import socket
 import ssl
-from typing import Tuple
+from typing import Optional, Tuple
 
 from pydantic import ValidationError
 
@@ -77,6 +77,13 @@ async def db_consumer_worker(
                 error_type=type(err).__name__,
                 error_details=str(err),
             )
+            await repo.insert_security_event(
+                tenant_id=tenant_id,
+                client_ip=client_ip,
+                event_type="SCHEMA_VIOLATION_DLQ",
+                reason=str(err).splitlines()[0],
+                raw_payload=raw_payload[:256],
+            )
             await firewall.record_violation(
                 client_ip,
                 reason=f"Malformed telemetry JSON from {tenant_id}",
@@ -93,6 +100,7 @@ async def handle_client(
     queue: asyncio.Queue[Tuple[str, str, str]],
     limiter: TokenBucketLimiter,
     firewall: ActiveDefenseFirewall,
+    repo: Optional[TelemetryRepository] = None,
 ) -> None:
     """Handles an incoming mTLS client connection with rate limiting and backpressure."""
     peername = writer.get_extra_info("peername")
@@ -161,7 +169,7 @@ async def main() -> None:
 
     # 3. Start mTLS Server (Systemd Socket Activation or Standalone)
     ssl_ctx = build_mtls_context()
-    client_callback = lambda r, w: handle_client(r, w, telemetry_queue, limiter, firewall)
+    client_callback = lambda r, w: handle_client(r, w, telemetry_queue, limiter, firewall, repo)
 
     if os.environ.get("LISTEN_FDS"):
         sock = socket.fromfd(3, socket.AF_INET, socket.SOCK_STREAM)
